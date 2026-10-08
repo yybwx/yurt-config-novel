@@ -1,0 +1,13 @@
+[
+  {
+    "name": "神凑轻小说",
+    "key": "shencou",
+    "type": "novel",
+    "apiVersion": 1,
+    "version": "1.0.0",
+    "minAppVersion": "1.6.3",
+    "fileName": "shencou.js",
+    "url": "https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/shencou.js",
+    "capabilities": ["discover", "categories"]
+  }
+]
