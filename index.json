@@ -15,10 +15,10 @@
     "key": "copy_novel",
     "type": "novel",
     "apiVersion": 1,
-    "version": "1.0.0",
+    "version": "1.1.0",
     "minAppVersion": "1.6.3",
     "fileName": "copy_novel.js",
     "url": "https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/copy_novel.js",
-    "capabilities": ["discover", "categories"]
+    "capabilities": ["discover", "categories", "comments", "commentReplies"]
   }
 ]

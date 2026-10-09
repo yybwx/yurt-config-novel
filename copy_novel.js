@@ -1,12 +1,13 @@
 class CopyNovelSource extends NovelSource {
     name = '拷贝轻小说';
     key = 'copy_novel';
-    version = '1.0.0';
+    version = '1.1.0';
     url = 'https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/copy_novel.js';
-    capabilities = ['discover', 'categories'];
+    capabilities = ['discover', 'categories', 'comments', 'commentReplies'];
     base = 'https://api.copy2000.online';
     _content = null;
     _requests = new Map();
+    _commentBooks = new Map();
 
     // API headers are local to this novel source, without comic tokens or settings.
     apiHeaders() {
@@ -79,7 +80,68 @@ class CopyNovelSource extends NovelSource {
         const result = await this.api(this.path(id));
         this.accessible(result);
         if (!result.book || result.book.path_word !== id) throw new Error('小说详情身份不匹配');
+        this.rememberCommentBook(id, result.book.uuid);
         return this.book(result.book);
+    }
+
+    // Comments use the site's book UUID; never replace path_word in saved book IDs.
+    rememberCommentBook(id, uuid) {
+        if (typeof uuid !== 'string' || !/^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/.test(uuid)) return;
+        this._commentBooks.delete(id);
+        this._commentBooks.set(id, uuid);
+        if (this._commentBooks.size > 16) this._commentBooks.delete(this._commentBooks.keys().next().value);
+    }
+
+    async commentBook(id) {
+        this.path(id);
+        if (!this._commentBooks.has(id)) await this.loadNovelInfo(id);
+        const uuid = this._commentBooks.get(id);
+        if (!uuid) throw new Error('小说评论缺少有效书籍身份');
+        return uuid;
+    }
+
+    // Anonymous comments and replies share one endpoint, with isolated page scopes.
+    async commentPage(id, replyId, cursor) {
+        this.path(id);
+        if (replyId !== '' && !/^[0-9]{1,20}$/.test(replyId)) throw new Error('无效评论 ID');
+        let page = null;
+        if (cursor != null) {
+            if (typeof cursor !== 'string' || cursor.length > 4096) throw new Error('无效评论续页');
+            page = JSON.parse(cursor);
+            if (!page || page.book !== id || page.reply !== replyId ||
+                !Number.isSafeInteger(page.offset) || page.offset < 1) throw new Error('无效评论续页');
+        }
+        const uuid = await this.commentBook(id);
+        if (page && page.uuid !== uuid) throw new Error('评论续页身份已变化，请刷新');
+        const offset = page ? page.offset : 0;
+        const result = await this.api('/api/v3/bookcomments', {book_id: uuid, reply_id: replyId, limit: 10, offset});
+        if (!Array.isArray(result.list) || !Number.isSafeInteger(result.total) || result.total < 0 ||
+            result.offset !== offset || !Number.isSafeInteger(result.limit) || result.limit < 1 ||
+            result.limit > 100 || result.list.length > result.limit) throw new Error('小说评论分页格式已变化');
+        const next = offset + result.list.length;
+        if (!Number.isSafeInteger(next) || !result.list.length && offset < result.total) {
+            throw new Error('小说评论未获取完整，请重试');
+        }
+        const comments = result.list.map(value => {
+            const cid = String(value.id);
+            if (!/^[0-9]{1,20}$/.test(cid) || typeof value.id === 'number' && !Number.isSafeInteger(value.id) ||
+                typeof value.comment !== 'string' || !value.comment.trim() ||
+                !Number.isSafeInteger(value.count) || value.count < 0) throw new Error('小说评论格式已变化');
+            return {id: cid, content: value.comment, author: value.user_name || '',
+                avatar: value.user_avatar || '', time: value.create_at || '', replyCount: value.count,
+                replyToAuthor: value.parent_user_name || ''};
+        });
+        return {comments, nextCursor: next < result.total
+            ? JSON.stringify({book: id, uuid, reply: replyId, offset: next}) : null};
+    }
+
+    async loadComments(id, cursor) {
+        return this.commentPage(id, '', cursor);
+    }
+
+    async loadCommentReplies(id, commentId, cursor) {
+        if (typeof commentId !== 'string' || !commentId) throw new Error('无效评论 ID');
+        return this.commentPage(id, commentId, cursor);
     }
 
     // Each volume has a stable upstream ID. Catalog loading never fetches its TXT.

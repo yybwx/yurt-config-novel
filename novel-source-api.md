@@ -16,7 +16,7 @@ class ExampleNovelSource extends NovelSource {
 }
 ```
 
-`key` 必须符合 `[a-zA-Z_][a-zA-Z0-9_]{0,63}`，安装后不应改变。清单中的 `key/type/apiVersion/version/minAppVersion` 与脚本保持一致。当前能力为 `discover` 和 `categories`。版本与最低应用版本为三段数字。
+`key` 必须符合 `[a-zA-Z_][a-zA-Z0-9_]{0,63}`，安装后不应改变。清单中的 `key/type/apiVersion/version/minAppVersion` 与脚本保持一致。当前能力为 `discover`、`categories`、`comments` 和 `commentReplies`。评论能力为协议 v1 的可选扩展，旧源无需添加；客户端仅在启用源声明 `comments` 时显示入口。版本与最低应用版本为三段数字。
 
 脚本可以实现 `async init()`。持久化使用 `loadData(key)`、`saveData(key, value)`、`deleteData(key)`，仅访问自身小说源数据。不要在源仓库提交 `.data`、账户、Cookie 或全文文件。导入与更新会执行脚本，仅安装可信来源。
 
@@ -71,11 +71,28 @@ return {
 - `discover(kind, cursor)`：返回与搜索相同的结果结构。约定 `popular/latest/new`；分类为 `category:<id>`。
 - `categories()`：返回 `[{id: '1', title: '分类名称'}]`。
 - `imageHeaders(url)`：返回请求头对象，可设置 Referer 等。
+- `loadComments(novelId, cursor)`：声明 `comments` 后必须实现，返回主评论页。
+- `loadCommentReplies(novelId, commentId, cursor)`：声明 `commentReplies` 后必须实现，且同时声明 `comments`，返回指定主评论的回复页。
 - `Network.fetchBytes(method, url, headers, data)`：返回 `{status, headers, body, error}`，正文编码使用 `Convert.decodeGbk/decodeUtf8` 等显式转换。
 - 请求头 `http_client: 'dart:io'` 可为该源请求选用 Dart 传输；不会修改漫画源的全局网络配置。客户端仍使用应用代理/Cookie，并限制请求超时。
 - `HtmlDocument` 使用后必须 `dispose()`。取 `innerHTML`；遍历节点可用 `node.toElement()`，该方法在小说桥中兼容已有的命名差异。
 
 各源有独立 HTML 句柄与存储。桥不允许调用漫画源的 `load_data/save_data/delete_data/load_setting`，也不提供任意文件、剪贴板或 UI 操作。这不是面向不可信脚本的完整安全沙箱。
+
+评论和回复采用相同结构：
+
+```javascript
+return {
+    comments: [{
+        id: '100', content: '评论正文', author: '读者',
+        avatar: 'https://example.com/avatar.png', time: '2026-10-09',
+        replyCount: 2, replyToAuthor: ''
+    }],
+    nextCursor: null
+};
+```
+
+`id` 和非空 `content` 必填，其余字段可省略；文字为纯文本，不执行 HTML/脚本。单页最多 100 条，ID 最长 256 字符、正文最多 16,384 字符、作者/回复对象最多 512 字符、时间最多 128 字符、头像/游标最多 4,096 字符；同页 ID 不重复。`replyCount` 为 0～1,000,000,000 的整数。头像仅支持无用户信息的 HTTP(S) 地址，无效地址使用默认头像。空列表且 `nextCursor: null` 表示空评论或末页，不能用空列表配续页伪装成功。游标绑定小说和回复主题，错误/验证/身份失效明确抛错，客户端保留已显示评论供刷新或重试。评论仅在页面内存中保存，不参与下载、离线正文或备份；目前不提供登录、发表评论、点赞或删除接口。
 
 ## 4. 发布验证
 
