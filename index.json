@@ -9,5 +9,16 @@
     "fileName": "shencou.js",
     "url": "https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/shencou.js",
     "capabilities": ["discover", "categories"]
+  },
+  {
+    "name": "拷贝轻小说",
+    "key": "copy_novel",
+    "type": "novel",
+    "apiVersion": 1,
+    "version": "1.0.0",
+    "minAppVersion": "1.6.3",
+    "fileName": "copy_novel.js",
+    "url": "https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/copy_novel.js",
+    "capabilities": ["discover", "categories"]
   }
 ]
