@@ -20,5 +20,27 @@
     "fileName": "copy_novel.js",
     "url": "https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/copy_novel.js",
     "capabilities": ["discover", "categories", "comments", "commentReplies"]
+  },
+  {
+    "name": "52书库",
+    "key": "shuku52",
+    "type": "novel",
+    "apiVersion": 1,
+    "version": "1.0.0",
+    "minAppVersion": "1.6.3",
+    "fileName": "shuku52.js",
+    "url": "https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/shuku52.js",
+    "capabilities": ["discover", "categories"]
+  },
+  {
+    "name": "69书楼",
+    "key": "shuku69",
+    "type": "novel",
+    "apiVersion": 1,
+    "version": "1.0.0",
+    "minAppVersion": "1.6.3",
+    "fileName": "shuku69.js",
+    "url": "https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/shuku69.js",
+    "capabilities": ["discover", "categories"]
   }
 ]

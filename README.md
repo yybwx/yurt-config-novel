@@ -18,6 +18,11 @@ https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/index.json
 | --- | --- | --- |
 | 神凑轻小说 | shencou.js | 搜索、详情、分卷目录、正文/插图、发现、分类 |
 | 拷贝轻小说 | copy_novel.js | 搜索、详情、按卷目录/阅读/下载、正文与插图、热门/更新/新书、分类、评论与回复 |
+<<<<<<< HEAD
+=======
+| 52书库 | shuku52.js | 搜索、详情、全书目录/阅读/下载、正文、热门/最新、分类 |
+| 69书楼 | shuku69.js | 搜索、详情、分章目录/阅读/下载、正文、推荐/最新、分类 |
+>>>>>>> f4d1df7 (feat(novel):)
 
 ### 拷贝轻小说
 
@@ -30,6 +35,14 @@ https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/index.json
 ```text
 https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/copy_novel.js
 ```
+
+### 52书库
+
+52书库(`shuku52`)是收录 GL 百合、耽美、言情等完结中文网络文学的阅读站，可匿名访问。站点按整本“第 N 页”分页、没有章节目录，因此目录只列一个“全书正文(共 N 页)”单元，阅读和下载时按续页连续翻页，章节名保留在正文中。单源 Raw 地址为 `https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/shuku52.js`，最低客户端版本 1.6.3。书籍 ID 使用站点自身路径，兼容新旧两种地址模板；搜索关键词用与浏览器一致的大写百分号编码。该站没有插图和账户体系，正文以纯文字为主。
+
+### 69书楼
+
+69书楼(`shuku69`)是中文网络小说镜像站，按章列目录、阅读和下载，支持搜索、书籍详情、推荐/最新/更新栏目和分类浏览，可匿名访问。站点搜索与作者页共用一个模糊匹配入口，结果会混入站内推荐且只有一页。正文以 base64 段落下发，源解码为纯文字段落，没有插图。单源 Raw 地址为 `https://raw.githubusercontent.com/yybwx/yurt-config-novel/main/shuku69.js`，最低客户端版本 1.6.3。该站部分书籍存在源站缺失的章节，目录如实反映站点数据。
 
 ## 阅读与下载
 
